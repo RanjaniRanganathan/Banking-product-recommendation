@@ -1,0 +1,140 @@
+--1.How to Retrieve All Data from CUSTOMERS, INVESTMENT_PRODUCTS, and INVESTMENT_RECOMMENDATIONS?
+
+SELECT *FROM CUSTOMERS;
+SELECT *FROM INVESTMENT_PRODUCTS;
+SELECT *FROM INVESTMENT_RECOMMENDATIONS;
+
+--2.How to Join the CUSTOMERS, INVESTMENT_RECOMMENDATIONS, and INVESTMENT_PRODUCTS Tables?
+
+SELECT
+    c.customer_name,
+    c.risk_tolerance,
+    p.product_name
+FROM
+    customers c
+    JOIN investment_recommendations r ON c.customer_id = r.customer_id
+    JOIN investment_products        p ON r.product_id = p.product_id;
+    
+--3.How to Retrieve Data Based on a Specific Condition (e.g., Customers with 'Retirement' as Investment Goal)
+
+SELECT
+    c.customer_name,
+    c.risk_tolerance,
+    p.product_name
+FROM
+    customers c
+    JOIN investment_recommendations r ON c.customer_id = r.customer_id
+    JOIN investment_products         p ON p.product_id = r.product_id where c.investment_goal ='Retirement';
+
+--4. How to Join the CUSTOMERS, INVESTMENT_RECOMMENDATIONS, and INVESTMENT_PRODUCTS Tables?
+
+SELECT 
+    c.customer_name,
+    c.risk_tolerance,
+    p.product_name
+FROM 
+    customers c
+    JOIN investment_recommendations r ON c.customer_id = r.customer_id
+    JOIN investment_products p ON r.product_id = p.product_id;
+    
+--5. How to Retrieve Data Based on a Specific Condition (e.g., Customers with 'Retirement' as Investment Goal)?
+
+SELECT 
+    c.customer_name,
+    c.risk_tolerance,
+    p.product_name
+FROM 
+    customers c
+    JOIN investment_recommendations r ON c.customer_id = r.customer_id
+    JOIN investment_products p ON r.product_id = p.product_id
+WHERE 
+    c.investment_goal = 'Retirement';
+    
+--6. How to Retrieve the Count of Customers for Each Investment Goal?
+
+select count(investment_goal)from customers group by investment_goal;
+
+
+--7. How to Retrieve the Average Return Rate of Products Recommended to Customers?
+
+select avg(return_rate) from investment_product;
+
+
+--8.How to Use Aggregate Functions to Get the Total Income of Customers for Each Investment Goal?
+
+select investment_goal,sum(income)from customers group by investment_goal;
+
+ 
+--************************* select_query_with_where_condition ************************
+
+--How to Retrieve Customers with 'Low' Risk Tolerance?
+select *from customers where risk_tolerance='Low';
+--How to Retrieve Products with a Return Rate Greater Than 10%?
+select product_name,return_rate from investment_products where return_rate>10;
+--How to Retrieve Customers Whose Age is Between 30 and 40?
+select*from customers where customer_age between 30 and 40;
+
+--***************************** Subquery *********************************************
+
+--9.Find the products with the highest return rate?
+select product_name,return_rate from investment_products where return_rate=(select max(return_rate) from investment_products);
+
+--10.How to list products with a return rate higher than the average return rate of all products?
+select product_name,return_rate from investment_products where return_rate>(select avg(return_rate)from investment_products);
+
+--************************** Aggregation and Grouping *******************************
+
+--11.How to find the total number of customers in each risk tolerance category?
+select risk_tolerance,count(*)from customers group by risk_tolerance;
+
+--12.How to calculate the average return rate for each risk level of investment products?
+select risk_level,avg(return_rate) from investment_products group by risk_level;
+
+--*************************  Window Functions  *******************************
+
+--13.How to rank customers by their income within each risk tolerance category?
+select customer_name,risk_tolerance,income,rank()over(partition by risk_tolerance order by income desc)as rank_within_risk from customers;
+
+--14.How to calculate cumulative investment return by product risk level?
+select product_name,risk_level,return_rate,sum(return_rate)over (partition by risk_level order by product_id)as cumulative_return from investment_products;
+
+--************************ Constraints and Validation *******************
+--15.How to ensure all customers have a valid age (e.g., greater than 18)?
+alter table customers
+add constraint chk_custome_age check(customer_age>18);
+
+--16.How to find violations of the risk level constraint in investment_products?
+select *from investment_products where risk_level not in('Low','Medium','High');
+
+--************************** Functions *******************************
+--17.How to concatenate customer names and their investment goals?
+select customer_name||'-'||investment_goal as "Customer investment"from customers;
+
+--18.How to find the last day of the month for a given recommendation date?
+select last_day(recommendation_date)from investment_recommendations;
+
+--19.How to calculate the absolute value of an investment return rate?
+select abs(return_rate)from investment_products;
+
+--20.How to find the length of a customer's name?
+select length(customer_name)as name_length from customers;
+
+--**********Review and Refine Data with Check for Missing or Null Values********
+ 
+select*from customers where income is Null;
+select *from investment_products where return_rate is Null;
+
+
+
+--Check for Duplicates:
+
+select customer_id,count(*)from investment_recommendations group by customer_id having count(*)>1;
+
+select product_name,count(*)from investment_products group by product_name having count(*)>1;
+
+
+
+--Delete the duplicate entry:
+
+delete from investment_products
+where product_id in(4,5);
